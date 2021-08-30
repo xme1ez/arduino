@@ -1,0 +1,88 @@
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27,16,2);  // init display
+
+const int buttonPinUp = 7;     // the number of the pushbutton pin
+const int buttonPinDown = 6;
+const int ledPin =  13;      // the number of the LED pin
+
+// Motor A connections
+const int enA = 3;
+const int in1 = 5;
+const int in2 = 4;
+
+int buttonStateUp = 0;         // variable for reading the pushbutton status
+int buttonStateDown = 0;
+int speedMotor = 0;
+
+
+void setup() {
+
+  Serial.begin(9600);
+  // initialize the LED pin as an output:
+  pinMode(ledPin, OUTPUT);
+  // initialize the pushbutton pin as an input:
+  pinMode(buttonPinUp, INPUT);
+  pinMode(buttonPinDown, INPUT);
+  
+  // Set all the motor control pins to outputs
+  pinMode(enA, OUTPUT);
+  pinMode(in1, OUTPUT);
+  pinMode(in2, OUTPUT);
+  
+  // Turn off motors - Initial state
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+
+  digitalWrite(in1, HIGH);
+  digitalWrite(in2, LOW);
+
+  lcd.init();                     
+  lcd.backlight();// Включаем подсветку дисплея
+  lcd.setCursor(3, 1);
+  lcd.print("mr. balbesina");
+  
+  lcd.setCursor(0, 0);
+  lcd.print("LCD 1602");  
+
+  delay(3000);
+
+}
+
+void loop() {
+
+  // get buttons states
+  buttonStateUp = digitalRead(buttonPinUp);
+  buttonStateDown = digitalRead(buttonPinDown);
+
+  //change speed based on buttons state
+  if (buttonStateUp == LOW) {
+    if (speedMotor < 251) {
+      speedMotor = speedMotor + 10;
+    }
+  }
+  if (buttonStateDown == LOW) {
+    if (speedMotor > 0) {
+      speedMotor = speedMotor - 10;
+    }
+  }
+
+  Serial.println(speedMotor);
+
+  analogWrite(enA, speedMotor);
+
+  //update screen data
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("speed = ");
+  
+  lcd.setCursor(8, 0);
+  lcd.print(speedMotor);
+  
+  lcd.setCursor(3, 1);
+  lcd.print("mr. balbesina");
+
+  delay(100);
+
+}
